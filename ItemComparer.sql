@@ -83,9 +83,9 @@ BEGIN
 END
 
 -- Check and create ShopId index on Item table
-IF NOT EXISTS ( SELECT 1 FROM sys.indexes WHERE [name] = 'IX_Item_ShopId' )
+IF NOT EXISTS ( SELECT 1 FROM sys.indexes WHERE [name] = 'IX_ItemWebPage_ShopId' )
 BEGIN
-	CREATE INDEX IX_Item_ShopId ON dbo.Item (ShopId)
+	CREATE INDEX IX_ItemWebPage_ShopId ON dbo.ItemWebPage (ShopId)
 END
 
 -- Check and create ShopId index on ItemPriceHistory table
@@ -111,14 +111,11 @@ BEGIN
 		,	i.ItemId
 		,	i.Name 		AS ItemName
 		,	iwp.PageURL
-		,	iwp.PriceTag
-		,	iwp.PriceTagType
-		,	iwp.PriceTagName		
-		,	iwp.PriceOverrideTag
-		,	iwp.PriceOverrideTagType
-		,	iwp.PriceOverrideTagName
+		,	COALESCE(iwp.PriceOverrideTag, iwp.PriceTag)			AS PriceTag
+		,	COALESCE(iwp.PriceOverrideTagType, iwp.PriceTagType)	AS PriceTagType
+		,	COALESCE(iwp.PriceOverrideTagName, iwp.PriceTagName)	AS PriceTagName		
 	FROM	dbo.Shop 	AS s 
-	JOIN	dbo.Item 	AS i ON i.ShopId = s.ShopId
-	JOIN	dbo.ItemWebPage	AS iwp ON iwp.ItemId = i.ItemId;
+	JOIN	dbo.ItemWebPage	AS iwp ON iwp.ShopId = s.ShopId
+	JOIN	dbo.Item 	AS i ON i.ItemId = iwp.ItemId;
 
 END
